@@ -1,0 +1,6 @@
+{
+  "name": "Decentralized Access Control System",
+  "description": "A secure file sharing system using IPFS for storage and Firebase for decentralized access control and immutable logging.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

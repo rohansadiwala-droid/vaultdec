@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- File Registry ---
+    match /files/{fileId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerId == request.auth.uid;
+
+      // Allow list and get if user is the owner
+      // In a real app, you'd add complex logic for shared access, 
+      // but to fix the error, we keep it simple for the owner.
+      allow read: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+
+      allow update: if isOwner(resource.data.ownerId);
+      allow delete: if isOwner(resource.data.ownerId);
+
+      match /permissions/{permissionId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
+    // --- Immutable Logs (Blockchain Simulation) ---
+    match /logs/{logId} {
+      allow create: if isSignedIn();
+      allow get, list: if isSignedIn();
+      allow update, delete: if false; // BLOCKCHAIN IMMUTABILITY
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "FileMetadata": {
+      "title": "File Metadata",
+      "description": "Information about a file stored on IPFS",
+      "type": "object",
+      "properties": {
+        "cid": { "type": "string", "description": "IPFS Content Identifier" },
+        "name": { "type": "string", "description": "Original file name" },
+        "size": { "type": "number", "description": "File size in bytes" },
+        "ownerId": { "type": "string", "description": "Firebase UID of the owner" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "description": "MIME type" }
+      },
+      "required": ["cid", "name", "ownerId", "createdAt"]
+    },
+    "AccessControl": {
+      "title": "Access Control",
+      "description": "Permission mapping for files",
+      "type": "object",
+      "properties": {
+        "fileId": { "type": "string", "description": "Document ID of the file" },
+        "grantedTo": { "type": "string", "description": "Firebase UID of the recipient" },
+        "grantedBy": { "type": "string", "description": "Firebase UID of the granter" },
+        "grantedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fileId", "grantedTo", "grantedBy", "grantedAt"]
+    },
+    "LogEntry": {
+      "title": "Log Entry",
+      "description": "Immutable audit log of system events",
+      "type": "object",
+      "properties": {
+        "action": { "type": "string", "enum": ["UPLOAD", "SHARE", "REVOKE", "ACCESS"] },
+        "userId": { "type": "string" },
+        "cid": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "details": { "type": "string" }
+      },
+      "required": ["action", "userId", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/files/{fileId}": {
+      "schema": "FileMetadata",
+      "description": "Registry of all files uploaded to the system"
+    },
+    "/files/{fileId}/permissions/{permissionId}": {
+      "schema": "AccessControl",
+      "description": "Subcollection of permissions for a specific file"
+    },
+    "/logs/{logId}": {
+      "schema": "LogEntry",
+      "description": "Immutable audit log"
+    }
+  }
+}
